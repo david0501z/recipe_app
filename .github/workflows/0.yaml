@@ -18,6 +18,10 @@ on:
         required: true
         default: 'chore: 更新文件'
         type: string
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'archive.zip'
 
 jobs:
   extract-and-commit:
