@@ -16,6 +16,8 @@ jobs:
     steps:
     - name: 检出代码
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
       
     - name: 设置Java
       uses: actions/setup-java@v4
@@ -29,34 +31,87 @@ jobs:
         flutter-version: '3.22.0'
         channel: 'stable'
         
-    - name: 备份当前项目
+    - name: 备份用户代码和配置
       run: |
-        cd ..
-        mv recipe_app recipe_app_backup
-        mkdir recipe_app
+        mkdir -p /tmp/recipe_app_backup
+        # 备份源代码
+        cp -r lib /tmp/recipe_app_backup/
+        cp -r assets /tmp/recipe_app_backup/ 2>/dev/null || true
+        # 备份关键配置文件
+        cp pubspec.yaml /tmp/recipe_app_backup/
+        cp -r android /tmp/recipe_app_backup/ 2>/dev/null || true
+        cp -r ios /tmp/recipe_app_backup/ 2>/dev/null || true
+        cp -r web /tmp/recipe_app_backup/ 2>/dev/null || true
+        cp -r linux /tmp/recipe_app_backup/ 2>/dev/null || true
+        cp -r windows /tmp/recipe_app_backup/ 2>/dev/null || true
+        cp -r macos /tmp/recipe_app_backup/ 2>/dev/null || true
+      
+    - name: 清理并重新创建项目
+      run: |
+        # 删除所有文件，但保留 .git 目录
+        find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} + 2>/dev/null || true
       
     - name: 创建新Flutter项目
       run: |
-        cd ..
-        flutter create -a kotlin recipe_app
+        flutter create -a kotlin .
       
-    - name: 恢复用户代码
+    - name: 恢复依赖配置
       run: |
-        cd ..
-        cp -r recipe_app_backup/lib recipe_app/
-        cp -r recipe_app_backup/assets recipe_app/ 2>/dev/null || true
-        cp recipe_app_backup/.git recipe_app/
+        # 从备份中提取依赖信息并合并到新的 pubspec.yaml
+        python3 << 'EOF'
+        import yaml
+        import os
         
+        # 读取备份的 pubspec.yaml
+        with open('/tmp/recipe_app_backup/pubspec.yaml', 'r') as f:
+            backup_pubspec = yaml.safe_load(f)
+        
+        # 读取新创建的 pubspec.yaml
+        with open('pubspec.yaml', 'r') as f:
+            new_pubspec = yaml.safe_load(f)
+        
+        # 合并依赖
+        if 'dependencies' in backup_pubspec:
+            new_pubspec['dependencies'] = backup_pubspec['dependencies']
+        
+        if 'dev_dependencies' in backup_pubspec:
+            new_pubspec['dev_dependencies'] = backup_pubspec['dev_dependencies']
+        
+        if 'dependency_overrides' in backup_pubspec:
+            new_pubspec['dependency_overrides'] = backup_pubspec['dependency_overrides']
+        
+        # 保留其他重要配置
+        important_keys = ['name', 'description', 'version', 'publish_to', 'environment']
+        for key in important_keys:
+            if key in backup_pubspec:
+                new_pubspec[key] = backup_pubspec[key]
+        
+        # 写回合并后的 pubspec.yaml
+        with open('pubspec.yaml', 'w') as f:
+            yaml.dump(new_pubspec, f, default_flow_style=False, sort_keys=False)
+        
+        print("依赖配置合并完成")
+        EOF
+      
+    - name: 恢复用户代码和平台配置
+      run: |
+        # 恢复源代码
+        cp -r /tmp/recipe_app_backup/lib .
+        cp -r /tmp/recipe_app_backup/assets . 2>/dev/null || true
+        
+        # 恢复平台特定配置（可选）
+        cp -r /tmp/recipe_app_backup/android/app/src/main/java android/app/src/main/ 2>/dev/null || true
+        cp -r /tmp/recipe_app_backup/android/app/src/main/res android/app/src/main/ 2>/dev/null || true
+        cp -r /tmp/recipe_app_backup/ios/Runner/Assets.xcassets ios/Runner/ 2>/dev/null || true
+        cp -r /tmp/recipe_app_backup/ios/Runner/Info.plist ios/Runner/ 2>/dev/null || true
         
     - name: 清理备份
       run: |
-        cd ..
-        rm -rf recipe_app_backup
+        rm -rf /tmp/recipe_app_backup
       
     - name: 获取依赖
       run: |
         flutter pub get
-        
         
     - name: 构建APK
       if: false
