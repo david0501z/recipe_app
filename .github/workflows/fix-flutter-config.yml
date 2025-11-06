@@ -33,6 +33,7 @@ jobs:
       run: |
         cd ..
         mv recipe_app recipe_app_backup
+        mkdir recipe_app
       
     - name: 创建新Flutter项目
       run: |
