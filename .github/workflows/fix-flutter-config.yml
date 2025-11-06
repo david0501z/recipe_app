@@ -1,4 +1,4 @@
-name: Flutter Project Configuration Fix
+name: Flutterfix
 
 on:
   workflow_dispatch:
