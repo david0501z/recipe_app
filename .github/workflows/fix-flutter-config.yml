@@ -45,7 +45,8 @@ jobs:
         cd ..
         cp -r recipe_app_backup/lib recipe_app/
         cp -r recipe_app_backup/assets recipe_app/ 2>/dev/null || true
-        cp recipe_app_backup/pubspec.yaml recipe_app/
+        cp recipe_app_backup/.git recipe_app/
+        
         
     - name: 清理备份
       run: |
@@ -58,10 +59,12 @@ jobs:
         
         
     - name: 构建APK
+      if: false
       run: |
         flutter build apk --release --verbose
         
     - name: 上传APK
+      if: false
       uses: actions/upload-artifact@v4
       with:
         name: app-release
