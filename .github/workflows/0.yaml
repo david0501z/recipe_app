@@ -6,7 +6,7 @@ on:
       archive_path:
         description: '文件压缩包路径（相对于项目根目录）'
         required: true
-        default: 'uploads/archive.zip'
+        default: 'archive.zip'
         type: string
       extract_path:
         description: '解压目标路径（相对于项目根目录）'
