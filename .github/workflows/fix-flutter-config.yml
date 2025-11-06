@@ -30,7 +30,9 @@ jobs:
         channel: 'stable'
         
     - name: 备份当前项目
-      run: mv recipe_app recipe_app_backup
+      run: |
+        cd ..
+        mv recipe_app recipe_app_backup
       
     - name: 创建新Flutter项目
       run: flutter create -a kotlin recipe_app
