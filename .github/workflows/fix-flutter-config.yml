@@ -48,33 +48,31 @@ jobs:
         cp recipe_app_backup/pubspec.yaml recipe_app/
         
     - name: 清理备份
-      run: rm -rf recipe_app_backup
+      run: |
+        cd ..
+        rm -rf recipe_app_backup
       
     - name: 获取依赖
       run: |
-        cd recipe_app
         flutter pub get
         
     - name: 分析代码
       run: |
-        cd recipe_app
         flutter analyze
         
     - name: 运行测试
       run: |
-        cd recipe_app
         flutter test
         
     - name: 构建APK
       run: |
-        cd recipe_app
         flutter build apk --release
         
     - name: 上传APK
       uses: actions/upload-artifact@v4
       with:
         name: app-release
-        path: recipe_app/build/app/outputs/flutter-apk/app-release.apk
+        path: build/app/outputs/flutter-apk/app-release.apk
         
     - name: 提交重建后的项目
       if: github.event.inputs.force_rebuild == 'true'
