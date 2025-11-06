@@ -282,27 +282,11 @@ class RecipeDetailScreen extends StatelessWidget {
   }
 
   void _shareRecipe(BuildContext context) {
-    final shareText = '''
-🍳 ${recipe.name}
-
-📝 描述：${recipe.description}
-⏰ 烹饪时间：${recipe.cookingTime}分钟
-⭐ 难度：${recipe.difficultyText}
-
-🥘 食材：
-${recipe.ingredients}
-
-👨‍🍳 制作步骤：
-${recipe.steps}
-
-来自菜谱大全APP
-    ''';
-
     // 这里可以集成分享功能，比如使用share_plus包
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('菜谱信息：$shareText'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text('菜谱已准备分享！'),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
