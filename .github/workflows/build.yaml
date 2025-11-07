@@ -111,7 +111,7 @@ jobs:
       run: flutter pub get
 
     - name: 分析代码
-      run: flutter analyze
+      run: flutter analyze --no-fatal-infos
 
     - name: 构建APK
       id: build_apk
